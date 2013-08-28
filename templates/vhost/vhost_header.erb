@@ -9,7 +9,7 @@ server {
   root                  <%= @www_root%>;
 <% end -%>
 <% if defined? @index_files-%>
-  index                 <%= @index_files%>;
+  index                 <%= join(@index_files, ' ')%>;
 <% end -%>
 <% if defined? @auth_basic -%>
   auth_basic           "<%= @auth_basic %>";
