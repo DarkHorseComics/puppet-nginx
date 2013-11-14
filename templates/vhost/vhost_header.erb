@@ -14,9 +14,21 @@ server {
 <% if defined? @auth_basic -%>
   auth_basic           "<%= @auth_basic %>";
 <% end -%>
-<% if defined? auth_basic_user_file -%>
+<% if defined? @auth_basic_user_file -%>
   auth_basic_user_file <%= @auth_basic_user_file %>;
 <% end -%>
+<%# make sure that allow comes before deny by forcing the allow key (if it -%>
+<%# exists) to be first in the output order.  The hash keys also need to be -%>
+<%# sorted so that the ordering is stable. -%>
+<% if @vhost_cfg_prepend -%><% vhost_cfg_prepend.sort_by{ |k, v| k.to_s == 'allow' ? '' : k.to_s }.each do |key,value| -%>
+  <%= key %> <%= value %>;
+<% end -%><% end -%>
+<% if @root -%>
+  root <%= @root %>;
+<% end -%>
+<% if @passenger_cgi_param -%><% @passenger_cgi_param.each do |key,value| -%>
+  passenger_set_cgi_param  <%= key %> <%= value %>;
+<% end -%><% end -%>
 <% @proxy_set_header.each do |header| -%>
   proxy_set_header        <%= header %>;
 <% end -%>
@@ -26,6 +38,9 @@ server {
   }
 <% end -%>
 
-  access_log            <%= scope.lookupvar('nginx::params::nx_logdir')%>/<%= @name.gsub(' ', '_') %>.access.log;
-  error_log             <%= scope.lookupvar('nginx::params::nx_logdir')%>/<%= @name.gsub(' ', '_') %>.error.log;
-
+<% if defined? @access_log_real -%>
+  access_log            <%= @access_log_real %>;
+<% end -%>
+<% if defined? @error_log_real -%>
+  error_log             <%= @error_log_real %>;
+<% end -%>

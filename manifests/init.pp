@@ -31,6 +31,9 @@
 class nginx (
   $worker_processes       = $nginx::params::nx_worker_processes,
   $worker_connections     = $nginx::params::nx_worker_connections,
+  $package_name           = $nginx::params::package_name,
+  $package_ensure         = $nginx::params::package_ensure,
+  $package_source         = $nginx::params::package_source,
   $proxy_set_header       = $nginx::params::nx_proxy_set_header,
   $proxy_http_version     = $nginx::params::nx_proxy_http_version,
   $confd_purge            = $nginx::params::nx_confd_purge,
@@ -40,19 +43,31 @@ class nginx (
   $proxy_cache_max_size   = $nginx::params::nx_proxy_cache_max_size,
   $proxy_cache_inactive   = $nginx::params::nx_proxy_cache_inactive,
   $configtest_enable      = $nginx::params::nx_configtest_enable,
+  $service_name           = $nginx::params::nx_service_name,
   $service_restart        = $nginx::params::nx_service_restart,
   $mail                   = $nginx::params::nx_mail,
   $server_tokens          = $nginx::params::nx_server_tokens,
+  $client_max_body_size   = $nginx::params::nx_client_max_body_size,
+  $proxy_buffers          = $nginx::params::nx_proxy_buffers,
+  $proxy_buffer_size      = $nginx::params::nx_proxy_buffer_size,
   $http_cfg_append        = $nginx::params::nx_http_cfg_append,
+  $nginx_error_log        = $nginx::params::nx_nginx_error_log,
+  $http_access_log        = $nginx::params::nx_http_access_log,
+  $log_formats            = {},
   $nginx_vhosts           = {},
   $nginx_upstreams        = {},
   $nginx_locations        = {},
+  $manage_repo            = $nginx::params::manage_repo,
 ) inherits nginx::params {
 
   include stdlib
 
   class { 'nginx::package':
-    notify => Class['nginx::service'],
+    package_name   => $package_name,
+    package_source => $package_source,
+    package_ensure => $package_ensure,
+    notify      => Class['nginx::service'],
+    manage_repo => $manage_repo,
   }
 
   class { 'nginx::config':
@@ -67,7 +82,12 @@ class nginx (
     proxy_cache_inactive  => $proxy_cache_inactive,
     confd_purge           => $confd_purge,
     server_tokens         => $server_tokens,
+    client_max_body_size  => $client_max_body_size,
+    proxy_buffers         => $proxy_buffers,
+    proxy_buffer_size     => $proxy_buffer_size,
     http_cfg_append       => $http_cfg_append,
+    nginx_error_log       => $nginx_error_log,
+    http_access_log       => $http_access_log,
     require               => Class['nginx::package'],
     notify                => Class['nginx::service'],
   }
@@ -75,6 +95,7 @@ class nginx (
   class { 'nginx::service':
     configtest_enable => $configtest_enable,
     service_restart   => $service_restart,
+    service_name      => $service_name,
   }
 
   validate_hash($nginx_upstreams)
