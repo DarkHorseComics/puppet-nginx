@@ -4,7 +4,9 @@ server {
   listen [<%= @ipv6_listen_ip %>]:<%= @ssl_port %> ssl<% if @spdy == 'on' %> spdy<% end %><% if @ipv6_listen_options %> <%= @ipv6_listen_options %><% end %>;
   <% end %>
   server_name  <%= @rewrite_www_to_non_www ? @name.gsub(/^www\./, '') : @server_name.join(" ") %>;
-
+  <% if defined? @www_root-%>
+  root                      <%= @www_root%>;
+  <% end -%>
   ssl on;
 
   ssl_certificate           <%= scope.lookupvar('nginx::params::nx_conf_dir') %>/<%= @name.gsub(' ', '_') %>.crt;
